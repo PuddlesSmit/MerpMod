@@ -3,12 +3,12 @@
 [DATABASE_VERSION]
 "11.0" 
 [WORKSPACE_DETAILS]
-"MerpMod" "C:\Users\Merrill\Dev\MerpMod" "C:\Users\Merrill\Dev\MerpMod\MerpMod.hws" "SuperH RISC engine" "KPIT GNUSH [ELF]" 
+"MerpMod" "C:\Projects\MerpMod-aijv1.4" "C:\Projects\MerpMod-aijv1.4\MerpMod.hws" "SuperH RISC engine" "KPIT GNUSH [ELF]" 
 [SHARED_WORKSPACE_CONTROL_STATUS]
 "" "" "" 
 "" "" "" 
 [PROJECTS]
-"MerpMod" "C:\Users\Merrill\Dev\MerpMod\MerpMod" "C:\Users\Merrill\Dev\MerpMod\MerpMod\MerpMod.hwp" 0 
+"MerpMod" "C:\Projects\MerpMod-aijv1.4\MerpMod" "C:\Projects\MerpMod-aijv1.4\MerpMod\MerpMod.hwp" 0 
 [INFORMATION]
 "No workspace information available" 
 [SCRAP]
@@ -18,12 +18,13 @@
 [GENERAL_DATA_PROJECT]
 [USERMENUTOOLS]
 [CUSTOMPLACEHOLDERS]
-"TARGETROM" "A8DH202X" "A8DH202X" 
+"MMVERSION" "MMVERSION" "01.40" 
+"TARGETROM" "AZ1G701V" "AZ1G701V" 
 "TESTROMDIR" "$(PROJDIR)\TestRom" "$(PROJDIR)\TestRom" 
 [MAKEFILE_BUILD_INFO]
 "$(WORKSPDIR)\make\$(PROJECTNAME)_$(CONFIGNAME).mak" "" "$(WORKSPDIR)\make" 0 0 0 
 [VD_CONFIGURATION_OPTIONS]
-"ACTIVE_DESKTOP" "0" 
+"ACTIVE_DESKTOP" "1" 
 [VD_CONFIGURATIONS]
 "0" "Default1" "1" 
 "1" "Default2" "1" 

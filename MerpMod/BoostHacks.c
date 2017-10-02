@@ -30,23 +30,27 @@ EcuHacksMain();
 
 	//Calculated gear is a BYTE!
 	float cgear = (char)*pCurrentGear;
-	float PGWGComp;
-	float WGDCInitial;
-	float WGDCMax;
+	float PGWGInitial;
+	float PGWGMax;
+	float WGDCInitialComp;
+	float WGDCMaxComp;
 
 	#if PGWG_RAMTUNING
 		if(pRamVariables->PGWGRamFlag = 0x01)
 		{
-			PGWGComp = Pull3DHooked(&PGWGRamTable, cgear, *pEngineSpeed);
+			PGWGInitial = Pull3DHooked(&PGWGRamTable, cgear, *pEngineSpeed);
+			PGWGMax = PGWGInitial;
 		}
 		else
 		{
 	#endif
 	
 	#if SWITCH_HACKS
-		PGWGComp = BlendAndSwitch(PGWGTableGroup, cgear, *pEngineSpeed);
+		PGWGInitial = BlendAndSwitchCurve(PGWGTableGroup, cgear, *pEngineSpeed, WastegateDutyBlendCurveSwitch);		
+		PGWGMax = PGWGInitial;
 	#else
-		PGWGComp = Pull3DHooked(PGWGTable1i, cgear, *pEngineSpeed);
+		PGWGInitial = Pull3DHooked(PGWGTable1i, cgear, *pEngineSpeed);
+		PGWGMax = PGWGInitial;
 	#endif
 
 	#if PGWG_RAMTUNING
@@ -57,44 +61,74 @@ EcuHacksMain();
 	#if WGDC_RAMTUNING
 		if(pRamVariables->WGDCInitialRamFlag = 0x01)
 		{
-			WGDCInitial = Pull3DHooked(&WGDCInitialRamTable, *pReqTorque, *pEngineSpeed);
-			WGDCMax = Pull3DHooked(&WGDCMaxRamTable, *pReqTorque, *pEngineSpeed);
+			WGDCInitialComp = Pull3DHooked(&WGDCInitialRamTable, *pReqTorque, *pEngineSpeed);
+			WGDCMaxComp = Pull3DHooked(&WGDCMaxRamTable, *pReqTorque, *pEngineSpeed);
 		}
 		else
 		{
 	#endif
 	
 	#if SWITCH_HACKS
-		WGDCInitial = BlendAndSwitch(WGDCInitialTableGroup, *pReqTorque, *pEngineSpeed);
-		WGDCMax = BlendAndSwitch(WGDCMaxTableGroup, *pReqTorque, *pEngineSpeed);
+		WGDCInitialComp = BlendAndSwitchCurve(WGDCInitialTableGroup, *pReqTorque, *pEngineSpeed, WastegateDutyBlendCurveSwitch);
+		WGDCMaxComp = BlendAndSwitchCurve(WGDCMaxTableGroup, *pReqTorque, *pEngineSpeed, WastegateDutyBlendCurveSwitch);
 	#else
-		WGDCInitial = Pull3DHooked(WGDCInitialTable1i, *pReqTorque, *pEngineSpeed);
-		WGDCMax = Pull3DHooked(WGDCMaxTable1i, *pReqTorque, *pEngineSpeed);
+		WGDCInitialComp = Pull3DHooked(WGDCInitialTable1i, *pReqTorque, *pEngineSpeed);
+		WGDCMaxComp = Pull3DHooked(WGDCMaxTable1i, *pReqTorque, *pEngineSpeed);
 	#endif
 	
 	#if WGDC_RAMTUNING
 		}
 	#endif
 	
-	pRamVariables->PGWGComp = PGWGComp;
+	pRamVariables->PGWGMaxComp = WGDCMaxComp;
+	pRamVariables->PGWGInitialComp = WGDCInitialComp;
+	PGWGInitial *= WGDCInitialComp;
+	PGWGMax *= WGDCMaxComp;
+	pRamVariables->WGDCInitialTarget = PGWGInitial;
+	pRamVariables->WGDCMaxTarget = PGWGMax;
 	
-	#if WGDC_LOCK
-	//Apply locks
-	if(*pEngineSpeed < RPMLockWGDC && *pThrottlePlate > ThrottleLockWGDC)
+	if(pRamVariables->BoostHackEnabled == HackEnabled)
 	{
-		pRamVariables->WGDCInitial = 100.0;
-		pRamVariables->WGDCMax = 100.0;
+		#if PROG_MODE
+		if(pRamVariables->ValetMode == ValetModeEnabled)
+		{
+			pRamVariables->WGDCInitialOutput = WGDCInitialComp * Pull3DHooked(&PGWGTableValetMode, *pReqTorque, *pEngineSpeed);
+			pRamVariables->WGDCMaxOutput = WGDCMaxComp * Pull3DHooked(&PGWGTableValetMode, *pReqTorque, *pEngineSpeed);
+		}
+		#endif
+		#if WGDC_LOCK
+		#if PROG_MODE
+		else
+		#else
+		else if
+		#endif
+		//Apply locks
+		(*pEngineSpeed < RPMLockWGDC && *pThrottlePlate > ThrottleLockWGDC)
+		{
+			pRamVariables->WGDCInitialOutput = 100.0;
+			pRamVariables->WGDCMaxOutput = 100.0;
+		}
+		#endif
+		#if WGDC_LOCK || PROG_MODE
+		else
+		#endif
+		{
+			pRamVariables->WGDCInitialOutput = PGWGInitial;
+			pRamVariables->WGDCMaxOutput = PGWGMax;	
+		}
 	}
-	else{
-	#endif
-	
-	pRamVariables->WGDCInitial = WGDCInitial * PGWGComp;
-	pRamVariables->WGDCMax = WGDCMax * PGWGComp;
-	
-	#if WGDC_LOCK
+	else
+	{
+		//TODO: Might need to use conditionals here! Do some roms use Requested Torque lookups??
+		#if TARGETBOOST_THROTTLEPLATE
+		pRamVariables->WGDCInitialOutput = Pull3DHooked((void*)OEMWGDCInitialTable, *pThrottlePlate, *pEngineSpeed);
+		pRamVariables->WGDCMaxOutput = Pull3DHooked((void*)OEMWGDCMaxTable, *pThrottlePlate, *pEngineSpeed);
+		#else
+		pRamVariables->WGDCInitialOutput = Pull3DHooked((void*)OEMWGDCInitialTable, *pReqTorque, *pEngineSpeed);
+		pRamVariables->WGDCMaxOutput = Pull3DHooked((void*)OEMWGDCMaxTable, *pReqTorque, *pEngineSpeed);
+		#endif	
 	}
-	#endif
-	
+		
 #endif
 
 	//Finish Pulling WGDC
@@ -110,22 +144,22 @@ void TargetBoostHack()
 {
 		//Calculated gear is a BYTE!
 	float cgear = (char)*pCurrentGear;
-	float PGTBComp;
-	float TargetBoost;
+	float PGTB;
+	float TargetBoostComp;
 
 	#if PGWG_RAMTUNING
 		if(pRamVariables->PGWGRamFlag = 0x01)
 		{
-			PGTBComp = Pull3DHooked(&PGTBRamTable, cgear, *pEngineSpeed);
+			PGTB = Pull3DHooked(&PGTBRamTable, cgear, *pEngineSpeed);
 		}
 		else
 		{
 	#endif
 		
 	#if SWITCH_HACKS
-		PGTBComp = BlendAndSwitch(PGTBTableGroup, cgear, *pEngineSpeed);
+		PGTB = BlendAndSwitchCurve(PGTBTableGroup, cgear, *pEngineSpeed, BoostBlendCurveSwitch);
 	#else
-		PGTBComp = Pull3DHooked(PGTBTable1i, cgear, *pEngineSpeed);
+		PGTB = Pull3DHooked(PGTBTable1i, cgear, *pEngineSpeed);
 	#endif
 		
 	#if PGTB_RAMTUNING
@@ -136,25 +170,48 @@ void TargetBoostHack()
 	#if TARGET_BOOST_RAMTUNING
 		if(pRamVariables->TargetBoostRamFlag = 0x01)
 		{
-			TargetBoost = Pull3DHooked(&TargetBoostRamTable, *pReqTorque, *pEngineSpeed);
+			TargetBoostComp = Pull3DHooked(&TargetBoostRamTable, *pReqTorque, *pEngineSpeed);
 		}
 		else
 		{
 	#endif
 
 	#if SWITCH_HACKS
-		TargetBoost = BlendAndSwitch(TargetBoostTableGroup, *pReqTorque, *pEngineSpeed);
+		TargetBoostComp = BlendAndSwitchCurve(TargetBoostTableGroup, *pReqTorque, *pEngineSpeed, BoostBlendCurveSwitch);
 	#else
-		TargetBoost = Pull3DHooked(TargetBoostTable1i, *pReqTorque, *pEngineSpeed);
+		TargetBoostComp = Pull3DHooked(TargetBoostTable1i, *pReqTorque, *pEngineSpeed);
 	#endif
 	
 	#if TARGET_BOOST_RAMTUNING
 		}
 	#endif
 	
-	pRamVariables->PGTBComp = PGTBComp;
-	pRamVariables->TargetBoost = TargetBoost * PGTBComp;
+	pRamVariables->PGTBComp = TargetBoostComp;
 	
+	PGTB = ( ( PGTB - 760) * TargetBoostComp) + 760; //COMP IS APPLIED TO RELATIVE UNITS NOT ABSOLUTE!!
+	
+	pRamVariables->TargetBoostTarget = PGTB;
+	
+	if(pRamVariables->BoostHackEnabled == HackEnabled)
+	{
+		if(pRamVariables->ValetMode == ValetModeEnabled)
+		{
+			pRamVariables->TargetBoostOutput = Pull3DHooked(&PGTBTableValetMode, *pReqTorque, *pEngineSpeed);
+		}
+		else
+		{
+			pRamVariables->TargetBoostOutput = PGTB;
+		}
+	}
+	else
+	{		
+		//TODO: Need to use conditionals here! Some roms use Requested Torque lookups!
+		#if TARGETBOOST_THROTTLEPLATE
+		pRamVariables->TargetBoostOutput = Pull3DHooked((void*)OEMTargetBoostTable, *pThrottlePlate, *pEngineSpeed);
+		#else
+		pRamVariables->TargetBoostOutput = Pull3DHooked((void*)OEMTargetBoostTable, *pReqTorque, *pEngineSpeed);			
+		#endif
+	}
 }
 #endif
 #endif

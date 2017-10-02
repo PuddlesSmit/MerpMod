@@ -29,9 +29,9 @@ float TimingHack()
 	float subIam;
 	float iam;
 
-	subIam = 1 - IAM;
+	subIam = HighPass(1 - IAM, 0.0f);
 	
-	pRamVariables->MaxSubtractiveKCA = BlendAndSwitch(KnockCorrectionRetardTableGroup, *pEngineLoad, *pEngineSpeed);
+	pRamVariables->MaxSubtractiveKCA = HighPass(BlendAndSwitchCurve(KnockCorrectionRetardTableGroup, *pEngineLoad, *pEngineSpeed, KnockControlBlendCurveSwitch),0.0f);
 	
 	pRamVariables->SubtractiveKCA = subIam *  pRamVariables->MaxSubtractiveKCA;
 	
@@ -44,7 +44,8 @@ float TimingHack()
 	{
 #endif
 
-	OutputValue = BlendAndSwitch(TimingTableGroup, *pEngineLoad, *pEngineSpeed);
+
+	OutputValue = BlendAndSwitchCurve(TimingTableGroup, *pEngineLoad, *pEngineSpeed, TimingBlendCurveSwitch);
 		
 #if TIMING_RAM_TUNING
 	}
@@ -56,19 +57,31 @@ float TimingHack()
 	}
 	else if(pRamVariables->LCTimingMode == LCTimingModeCompensated)
 	{
-		pRamVariables->LCTimingRetard = Pull3DHooked(&LCTimingRetardTable, *pVehicleSpeed, *pEngineSpeed);
+		pRamVariables->LCTimingRetard = HighPass(Pull3DHooked(&LCTimingRetardTable, *pVehicleSpeed, *pEngineSpeed),0.0f);
 	
 		pRamVariables->LCTimingRetard *= pRamVariables->LCTimingRetardMultiplier;
 		
-		OutputValue -= pRamVariables->LCTimingRetard;
+		OutputValue -= HighPass(pRamVariables->LCTimingRetard,0.0f);
 	}
 
-	pRamVariables->BaseTiming = OutputValue;
+	OutputValue -= Abs(pRamVariables->SubtractiveKCA);
 	
-	if(pRamVariables->TimingHackEnabled == 0)
-		pRamVariables->TimingHackOutput = pRamVariables->BaseTiming - Abs(pRamVariables->SubtractiveKCA);
+	pRamVariables->BaseTimingTarget = OutputValue;
+	
+	if(pRamVariables->TimingHackEnabled == HackEnabled)
+		{
+			pRamVariables->BaseTimingOutput = OutputValue;
+			pRamVariables->FBKCRetardValue = BlendCurve(FBKCRetardValue1,FBKCRetardValue2,KnockControlBlendCurveSwitch);
+			pRamVariables->FBKCRetardValueAlternate = BlendCurve(FBKCRetardValueAlternate1,FBKCRetardValueAlternate2,KnockControlBlendCurveSwitch);
+		}
 	else
-		pRamVariables->TimingHackOutput = Pull3DHooked((void*)PrimaryOEMTimingTable, *pEngineLoad, *pEngineSpeed);	
+		{
+			pRamVariables->BaseTimingOutput = Pull3DHooked((void*)PrimaryOEMTimingTable, *pEngineLoad, *pEngineSpeed);	
+	    	pRamVariables->FBKCRetardValue = *dFBKCRetardValue;
+			pRamVariables->FBKCRetardValueAlternate = *dFBKCRetardValueAlternate;
+		}
+
+	
 		
 	//Call existing!
 	BaseTimingHooked();

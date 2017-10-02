@@ -52,6 +52,7 @@ void CelFlashStart(unsigned char CelFlashes, unsigned char Speed, unsigned char 
 	
 void CelFlash()
 {	
+	unsigned char test;
 	// Check for existing flash call
 	if(pRamVariables->CelFlashCounter > 0)
 	{
@@ -98,33 +99,96 @@ void CelFlash()
 	//	}
 	//}
 	
-
 ////////////////////////////////
 //KNOCK LIGHT CODE w/ IAM RECALL
 ////////////////////////////////
-
-	if(*pFBKC <= FBKCHiThreshold && *pEngineLoad > FBKCLoadThreshold)
+#if PROG_MODE
+//Disable flashes during programming mode
+if(pRamVariables->ProgModeStatus == ProgModeEnabled)
+{
+#endif
+/*
+	if(*pFBKC <= FBKCHiThreshold && *pEngineLoad > FBKCLoadThreshold) // to-do, use switches and check elsewhere instead.
 	{
 		CelFlashStart(FBKCHiFlashes,FBKCHiFlashSpeed,0,0);
 	}
-	else if(*pFBKC <= FBKCLoThreshold && *pEngineLoad > FBKCLoadThreshold)
+	else if(*pFBKC <= FBKCLoThreshold && *pEngineLoad > FBKCLoadThreshold) // to-do, use switches and check elsewhere instead.
 	{
 		CelFlashStart(FBKCLoFlashes,FBKCLoFlashSpeed,0,0);
 	}
 #if !defined(NOAF1RES)
-	else if(*pAf1Res < EGTResistanceThreshold && *pEngineLoad > EGTCelLoadThreshold)
+	else if(*pAf1Res < EGTResistanceThreshold && *pEngineLoad > EGTCelLoadThreshold)// to-do, use switches and check elsewhere instead.
 	{
 		CelFlashStart(EGTFlashes,EGTFlashSpeed,0,0);
 	}
 #endif
-	else if (*pCoolantTemp > ECTFlashThreshold)
+	else if (*pCoolantTemp > ECTFlashThreshold) // to-do, use switches and check elsewhere instead.
 	{
 		CelFlashStart(ECTFlashes,ECTFlashSpeed,64,0);
 	}
-	else if(IAM < IAMFlashThreshold)
+	else if(IAM < IAMFlashThreshold) // to-do, use switches and check elsewhere instead.
 	{
 		CelFlashStart(IAMFlashes,IAMFlashSpeed,64,0);
 	}
+	else if(pRamVariables->MapBlendOutOfRangeSwitch == 1)
+	{
+		CelFlashStart(MapBlendFlashes,MapBlendFlashSpeed,32,0);		
+	}
+	else if(pRamVariables->LeanBoostSwitch == 1)
+	{
+		CelFlashStart(LeanBoostFlashes,LeanBoostFlashSpeed,32,0);		
+	}
+	else if(pRamVariables->FuelPressureDeltaSwitch == 1)
+	{
+		CelFlashStart(FuelPressureDeltaFlashes,FuelPressureDeltaFlashSpeed,32,0);		
+	}	
+
+*/
+
+
+	if(pRamVariables->FailSafeFBKCHiSwitch == 1)
+	{
+		CelFlashStart(FBKCHiFlashes,FBKCHiFlashSpeed,0,0);
+	}
+	else if(pRamVariables->FailSafeFBKCLoSwitch == 1)
+	{
+		CelFlashStart(FBKCLoFlashes,FBKCLoFlashSpeed,0,0);
+	}
+#if !defined(NOAF1RES)
+	else if(pRamVariables->FailSafeEGTSwitch == 1)
+	{
+		CelFlashStart(EGTFlashes,EGTFlashSpeed,0,0);
+	}
+#endif
+	else if (pRamVariables->FailSafeCoolantTempSwitch == 1) // to-do, use switches and check elsewhere instead.
+	{
+		CelFlashStart(ECTFlashes,ECTFlashSpeed,64,0);
+	}
+	else if(pRamVariables->FailSafeIAMSwitch == 1)
+	{
+		CelFlashStart(IAMFlashes,IAMFlashSpeed,64,0);
+	}
+	else if(pRamVariables->FailSafeMapBlendSwitch == 1)
+	{
+		CelFlashStart(MapBlendFlashes,MapBlendFlashSpeed,32,0);	
+	}
+	else if(pRamVariables->FailSafeLeanBoostSwitch == 1)
+	{
+		CelFlashStart(LeanBoostFlashes,LeanBoostFlashSpeed,32,0);		
+	}
+	else if(pRamVariables->FailSafeFuelPressureDeltaSwitch == 1)
+	{
+		CelFlashStart(FuelPressureDeltaFlashes,FuelPressureDeltaFlashSpeed,32,0);		
+	}
+	else if(pRamVariables->FailSafeInjectorDutyCycleSwitch ==1)
+	{
+		CelFlashStart(InjectorDutyCycleFlashes,InjectorDutyCycleFlashSpeed,32,0);		
+	}	
+
+
+#if PROG_MODE
+}
+#endif
 	
 	// Call triggers if signal changes!
 	if(pRamVariables->CelSignal != pRamVariables->CelSignalLast)

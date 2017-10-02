@@ -35,19 +35,19 @@ void SetClutch(int value)
 }
 #endif
 
+#ifdef pBrakeFlags
 void SetBrake(int value)
 {
-	#ifdef pBrakeFlags
-		if (value == 0)
-		{
-			*pBrakeFlags &= ~(BrakeBitMask);
-		}
-		else
-		{
-			*pBrakeFlags |= BrakeBitMask;
-		}
-	#endif
+	if (value == 0)
+	{
+		*pBrakeFlags &= ~(BrakeBitMask);
+	}
+	else
+	{
+		*pBrakeFlags |= BrakeBitMask;
+	}
 }
+#endif
 
 #if REVLIM_HACKS
 
@@ -76,9 +76,14 @@ void RevLimUnitTest(unsigned char flag, int brake, int clutch, float throttle, f
 	pRamVariables->VinAuth = 0x01;
 #endif
 
+#ifdef pBrakeFlags
 	SetBrake(brake);
+#endif
+
+#if !AUTO_TRANS
 	SetClutch(clutch);
-	
+#endif	
+	*pThrottlePlate = throttle;
 	*pEngineSpeed = rpm;
 	*pVehicleSpeed = mph;
 
@@ -158,7 +163,7 @@ void RevLimUnitTests()
 	//SHOULD RESUME HERE, but LC still engaged (on LC limit)
 	*pEngineSpeed = DefaultLaunchControlCut - DefaultLaunchControlHyst - 1;
 	RevLimCode();
-	Assert(GetFuelCutFlag() && pRamVariables->LCEngaged , "Launch Control: Resume fuel at LaunchControlResume - 1 RPM, standstill, clutch pressed");
+	Assert(!GetFuelCutFlag() && pRamVariables->LCEngaged , "Launch Control: Resume fuel at LaunchControlResume - 1 RPM, standstill, clutch pressed");
 	
 	//TEST7: low throttle
 	//Set throttle 
@@ -210,9 +215,13 @@ void RevLimUnitTests()
 	*pThrottlePlate = 20;
 	*pVehicleSpeed = 50.0f;
 	*pEngineSpeed = pRamVariables->LaunchControlCut - 100;
+#if !AUTO_TRANS
 	SetClutch(0);
+#endif
 	RevLimCode(); //This sets the current gear
+#if !AUTO_TRANS	
 	SetClutch(1);
+#endif
 	RevLimCode();
 	//Should NOT cut due to throttle.
 	Assert(!GetFuelCutFlag() && !pRamVariables->LCEngaged, "Flat Foot Shifting: Resume fuel at FlatFootShiftResume - 1 RPM, moving, clutch pressed");
@@ -221,14 +230,21 @@ void RevLimUnitTests()
 	//Should engage FFS and cut
 	*pEngineSpeed = pRamVariables->FlatFootShiftRpmThreshold + 500;
 	*pThrottlePlate = FFSMinimumThrottle + 1;
-	RevLimCode(); //This sets the FFS engaged, and sets the FFSRPM
+#if !AUTO_TRANS	
+	SetClutch(0);
+	RevLimCode(); //This sets the clutch depressed test
+	SetClutch(1);
+#endif	
+	RevLimCode(); //Sets FFSEngaged = 1 and sets the FFSRPM
+	Assert(pRamVariables->FFSEngaged == 1,"FFS Intermediate step");
+	RevLimCode(); //Sets FFSEngaged = 2
 	Assert(GetFuelCutFlag() && (pRamVariables->FFSEngaged == 2), "Flat Foot Shifting: Cut fuel at FlatFootShiftCut + 1 RPM, moving, clutch pressed");	
 
 	//TEST 3: Set rpm low
 	//Should disable FFS and resume fuel
 	*pEngineSpeed = pRamVariables->RevLimResume - 1;
 	RevLimCode();
-	Assert(!GetFuelCutFlag() && !pRamVariables->FFSEngaged, "FFS resume when rpm drops");
+	Assert(!GetFuelCutFlag() && pRamVariables->FFSEngaged == 2, "FFS resume when rpm drops");
 	
 	//TEST 4: Engage ffs and cut again
 	*pEngineSpeed = pRamVariables->FlatFootShiftRpmThreshold + 500;
@@ -238,7 +254,9 @@ void RevLimUnitTests()
 	//Set throttle below  FFS threshold, should resume
 	*pThrottlePlate = FFSMinimumThrottle - 1;
 	*pVehicleSpeed = 19.0f;
+#if !AUTO_TRANS	
 	SetClutch(1);
+#endif	
 	RevLimCode();
 	RevLimCode();
 	Assert(!GetFuelCutFlag(), "Flat Foot Shifting: Resume fuel at FlatFootShiftResume - 1 RPM, moving, clutch pressed");
@@ -249,8 +267,12 @@ void RevLimUnitTests()
 	
 	*pEngineSpeed = 6000.0f;
 	*pVehicleSpeed = 0.0f;
+#if	!AUTO_TRANS
 	SetClutch(1);
+#endif	
+	#ifdef pBrakeFlags
 	SetBrake(0);
+	#endif
 	*pFlagsRevLim = 0x00;					
 	RevLimCode();
 	unsigned char flags = *pFlagsRevLim;
@@ -259,7 +281,9 @@ void RevLimUnitTests()
 	// Verify the other bits in the rev limiter flag are not modified.
 	*pEngineSpeed = 1000.0f;
 	*pVehicleSpeed = 0.0f;
+#if !AUTO_TRANS	
 	SetClutch(0);
+#endif	
 	*pFlagsRevLim = 0xFF;
 	RevLimCode();
 	flags = ~*pFlagsRevLim;

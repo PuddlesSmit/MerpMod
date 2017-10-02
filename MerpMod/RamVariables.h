@@ -17,23 +17,24 @@
 //////////////////////////
 typedef struct
 {
-	unsigned char MasterInitFlag;
+	unsigned char RamVariableStart;
 	unsigned char VinAuth;
 	unsigned char CruiseCoastLast;
 	unsigned char CruiseResumeLast;
+	unsigned long ECUIdentifier;
+	unsigned char HardResetFlag;
+	unsigned char blank0;
+	unsigned char blank1;
+	unsigned char blank2;
 	
 #if VIN_HACKS
 	unsigned char VehicleIdent[20];
 #endif
 
+#if INJECTOR_HACKS
 	float InjectorScaling;
-	float Mfempty;
-	float Mfempty1;
-	float Mfempty2;
-//	float Mfempty3;
-//	float Mfempty4;
-//	float Mfempty5;
-//	float Mfempty6;
+	float InjectorScalingMultiplier;
+#endif
 	
 #if SPARK_CUT
 	unsigned char SparkEventsX;
@@ -48,12 +49,40 @@ typedef struct
 
 #if SWITCH_HACKS
 	unsigned char MapSwitch;
+	unsigned char MapBlendingInputMode;
+	unsigned char MapSwitchingInputMode;
+	unsigned char WideBandLambdaInputMode;
+	unsigned char FuelPressureInputMode;
+	unsigned char swblank;
 	float MapBlendRatio;
 	float TGVLeftVolts;
 	float TGVRightVolts;
-	float TGVLeftScaled;
-	float TGVRightScaled;
+	float WideBandLambda;
+	float FuelPressure;
+	float FuelPressureDelta;
+	float RearO2Volts;
+	float MAFSensorVolts;
+	float MapSwitchInputVoltage;
+	unsigned short MapBlendOutOfRangeCounter;
+	unsigned char FailSafeMapBlendSwitch;
+	unsigned char SIDriveMode;
+	unsigned short LeanBoostCounter;
+	unsigned char FailSafeLeanBoostSwitch;
+	unsigned short FuelPressureDeltaCounter;
+	unsigned char FailSafeFuelPressureDeltaSwitch;
+	unsigned char FailSafeFuelAdditiveSwitch;
+	float InjectorDutyCycle;
+	unsigned char FailSafeInjectorDutyCycleSwitch;
+
+
+
+//ToDo:	
+// 	
+//  float WideBandDelta;	
+
 #endif
+
+
 
 #if SD_HACKS
 	//MAF/SD params
@@ -68,6 +97,7 @@ typedef struct
 	float DeltaMapCompensation;	
 	float SDMafBlendRatio;
 	float SDMafFromBlend;
+	float MafFromDualSensorScaling;
 
 #endif
 	
@@ -75,13 +105,12 @@ typedef struct
 	//Rev Limiter params
 	unsigned char  	RevLimInitFlag;  //96
 	unsigned char  	RevLimMode;
-	char	FlatFootShiftMode;
-	char	LCEngaged;
-	char	FFSEngaged;
-	char	elemptteey;
-	char	elempty1;
+	unsigned char	FlatFootShiftMode;
+	unsigned char	LCEngaged;
+	unsigned char	FFSEngaged;
+	unsigned char	ClutchSwitchLast;
+	unsigned char FFSGear;
 	char	eleemee2;
-	float	FFSGear;
 	float 	RevLimCut;	//96
 	float 	RevLimResume;
   	float  	RedLineCut;
@@ -114,16 +143,20 @@ typedef struct
 	unsigned char CelFlashDelay;
 	unsigned char celunused;
 	
-	//unsigned char CruiseSpeedCounter;			
-	//unsigned char CruiseFlashCounter;
+	unsigned char FailSafeFBKCHiSwitch;
+	unsigned char FailSafeFBKCLoSwitch;
+#if !defined(NOAF1RES)
+	unsigned char FailSafeEGTSwitch;
+#endif
+	unsigned char FailSafeCoolantTempSwitch;
+	unsigned char FailSafeIAMSwitch;
+
+	
 
 #endif
 
 #if PROG_MODE
-	unsigned char ProgModeEnable;
-	unsigned char ProgModeTimer;
-	unsigned char ProgModeEntry;
-	unsigned char ProgModeWait;
+	unsigned char ProgModeStatus;
 	unsigned char ProgModeCurrentMode;
 	unsigned char ProgModeValueFlashes;
 	unsigned char ValetMode;
@@ -136,15 +169,17 @@ typedef struct
 	unsigned char 	TimingHackInitFlag;		//97
 	unsigned char 	LCTimingMode;
 	unsigned char	TimingHackEnabled;
-	char	Tempty1;	
-	float	BaseTiming;
-	float 	TimingHackOutput;	//97
+	unsigned char	Tempty1;	
+	float	BaseTimingTarget;
+	float 	BaseTimingOutput;	//97
 	float 	LCTimingRetard;		//97
 	float 	LCTimingLock;		//97
 	float	LCTimingLockRPM;
 	float	LCTimingRetardMultiplier;
 	float	SubtractiveKCA;
 	float	MaxSubtractiveKCA;
+	float	FBKCRetardValue;
+	float	FBKCRetardValueAlternate;
 #endif
 
 #if POLF_HACKS
@@ -152,7 +187,7 @@ typedef struct
 	unsigned char 	POLFuelHackInitFlag;	//97
 	unsigned char 	LCFuelMode;
 	unsigned char	PolfHackEnabled;
-	char	Fempty1;	
+	unsigned char	Fempty1;	
 	float PolfTarget;
 	float PolfOutput;		//97
 	float LCFuelEnrich;			//97
@@ -161,16 +196,24 @@ typedef struct
 #endif
 
 #if BOOST_HACKS	
+	unsigned char BoostHackEnabled;
+	unsigned char bhempty;
+	unsigned char bhempty1;
+	unsigned char bhempty2;
 	//Target Boost Params
-	float TargetBoost;
+	float TargetBoostTarget;
+	float TargetBoostOutput;
 		
 	//PGWG Params
-	float PGWGComp;
+	float PGWGInitialComp;
+	float PGWGMaxComp;
 	float PGTBComp;
 	
 	//WGDC Params
-	float WGDCInitial;
-	float WGDCMax;
+	float WGDCInitialTarget;
+	float WGDCInitialOutput;
+	float WGDCMaxTarget;
+	float WGDCMaxOutput;
 #endif
 	
 	
@@ -251,8 +294,16 @@ typedef struct
 	unsigned char testchar3;
 	unsigned char testchar4;
 	unsigned short PortParameters[20];
+	unsigned short ADCParameters[40];
 	
 #endif
+
+#if RAM_HOLE_SCANNER
+	unsigned short ScannedAddress;
+	unsigned short ScannedValue;
+	unsigned long ScannedStackPointer;
+#endif
+
 long	RamHoleSpace;
 char	RamHoleEndMarker;
 	

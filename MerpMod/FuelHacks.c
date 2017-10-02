@@ -14,6 +14,20 @@
 
 #include "EcuHacks.h"
 
+#if SWITCH_HACKS && INJECTOR_HACKS
+
+void InjectorHack(){
+
+pRamVariables->InjectorScalingMultiplier = Pull2DHooked(&InjectorScalingMultiplierTable,pRamVariables->MapBlendRatio);
+
+if(pRamVariables->PolfHackEnabled == HackEnabled)
+	pRamVariables->InjectorScaling = pRamVariables->InjectorScalingMultiplier * *dInjectorScaling;
+else 
+	pRamVariables->InjectorScaling = *dInjectorScaling;
+}
+
+#endif
+
 #if POLF_HOOK_DEFINED
 	void (*PolfHooked)() __attribute__ ((section ("RomHole_Functions"))) = (void(*)()) sPolf;
 
@@ -36,23 +50,28 @@ EcuHacksMain();
 		{
 	#endif
 	
-		OutputValue	= BlendAndSwitch(FuelTableGroup, *pEngineLoad, *pEngineSpeed);
+		OutputValue	= BlendAndSwitchCurve(FuelTableGroup, *pEngineLoad, *pEngineSpeed, OpenLoopFuelingBlendCurveSwitch);
 		
 	#if POLF_RAM_TUNING
 		}
 	#endif
 		pRamVariables->LCFuelEnrich = Pull3DHooked(&LCFuelEnrichTable, *pVehicleSpeed, *pEngineSpeed) * pRamVariables->LCFuelEnrichMultiplier;
-	
+
 		if(pRamVariables->LCFuelMode == LCFuelModeCompensated)
 		{
 			OutputValue += pRamVariables->LCFuelEnrich;
 		}
 		//Now run existing code!
+
+		if(pRamVariables->FailSafeFuelAdditiveSwitch == 1)
+		{
+			OutputValue += (FailSafeFuelAdditive * 0.0078125);
+		}
 	
 		pRamVariables->PolfTarget = OutputValue;
-	
-		if(pRamVariables->PolfHackEnabled == 0)
-			pRamVariables->PolfOutput = pRamVariables->PolfTarget;
+		
+		if(pRamVariables->PolfHackEnabled == HackEnabled)
+			pRamVariables->PolfOutput = OutputValue;
 		else
 			pRamVariables->PolfOutput = Pull3DHooked((void*)PrimaryOEMPolfTable, *pEngineLoad, *pEngineSpeed);	
 #endif

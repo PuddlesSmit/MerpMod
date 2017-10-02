@@ -26,7 +26,7 @@ float Pull3DRamHook(float* table, float xLookup, float yLookup)
 	//Check if r4 is ram or not??
 	//WARNING: cannot use LOOKUP TABLES in this region (pRamVariables)!!!
 	//Lookup tables must be static or this needs to change.
-	if(((void*)table > (void*)&(pRamVariables->MasterInitFlag)) && ((void*)table < (void*)&(pRamVariables->RamHoleEndMarker)))
+	if(((void*)table > (void*)&(pRamVariables->RamVariableStart)) && ((void*)table < (void*)&(pRamVariables->RamHoleEndMarker)))
 	{
 		return *table;
 	}
@@ -39,7 +39,7 @@ float Pull3DRamHook(float* table, float xLookup, float yLookup)
 float Pull2DRamHook(float* table, float xLookup)
 {
 	//Check if r4 is ram or not??
-	if(table > (float*)&(pRamVariables->MasterInitFlag))
+	if(table > (float*)&(pRamVariables->RamVariableStart))
 	{
 		return *table;
 	}
@@ -48,3 +48,70 @@ float Pull2DRamHook(float* table, float xLookup)
 		 return Pull2DHooked((TwoDTable*)table, xLookup);
 	}
 }
+
+#if SWITCH_HACKS
+
+float Pull2DRamHookTipInEnrich(float* table, float xLookup)
+{
+
+	if((table == tTipInEnrich
+		|| table == tTipInEnrich2)  && (pRamVariables->PolfHackEnabled == HackEnabled))//This hook is used by other tables!!
+		return Pull2DHooked((TwoDTable*)table, xLookup)
+		* Pull3DHooked((ThreeDTable*)&TipInEnrichMultiplier, pRamVariables->MapBlendRatio, xLookup);
+	return Pull2DHooked((TwoDTable*)table, xLookup);
+}
+
+float Pull2DRamHookCrankingFuel(float* table, float xLookup)
+{
+	if((table == tCrankingFuelA ||
+	table == tCrankingFuelB ||
+	table == tCrankingFuelC ||
+	table == tCrankingFuelD ||
+	table == tCrankingFuelE ||
+	table == tCrankingFuelF) && (pRamVariables->PolfHackEnabled == HackEnabled))//This hook is used by other tables!!
+		return Pull2DHooked((TwoDTable*)table, xLookup) 
+		* Pull3DHooked((ThreeDTable*)&CrankingFuelMultiplier, pRamVariables->MapBlendRatio, xLookup);
+	return Pull2DHooked((TwoDTable*)table, xLookup);	
+
+}
+
+float Pull2DRamHookStartupEnrich2(float* table, float xLookup)
+{
+	if((table == tStartupEnrich2_1A ||
+	table == tStartupEnrich2_1B ||
+	table == tStartupEnrich2_2A ||
+	table == tStartupEnrich2_2B) && (pRamVariables->PolfHackEnabled == HackEnabled))//This hook is used by other tables!!
+		return Pull2DHooked((TwoDTable*)table, xLookup)
+		* Pull3DHooked((ThreeDTable*)&StartupEnrichMultiplier, pRamVariables->MapBlendRatio, xLookup);
+	return Pull2DHooked((TwoDTable*)table, xLookup);
+
+}
+
+float Pull2DRamHookStartupEnrich3(float* table, float xLookup)
+{
+	if((table == tStartupEnrich3_1A ||
+	table == tStartupEnrich3_1B ||
+	table == tStartupEnrich3_2A ||
+	table == tStartupEnrich3_2B) && (pRamVariables->PolfHackEnabled == HackEnabled))//This hook is used by other tables!!
+		return Pull2DHooked((TwoDTable*)table, xLookup) 
+		* Pull3DHooked((ThreeDTable*)&StartupEnrichMultiplier,pRamVariables->MapBlendRatio, xLookup);
+	return Pull2DHooked((TwoDTable*)table, xLookup);
+}
+
+float Pull2DRamHookFrontO2Scaling(float* table, float xLookup)
+{
+	if((table == tFrontO2Scaling) && (pRamVariables->PolfHackEnabled == HackEnabled))//This hook is used by other tables!!
+		return BlendCurve(Pull2DHooked(&FrontOxygenSensorScaling1,xLookup),Pull2DHooked(&FrontOxygenSensorScaling2,xLookup),ClosedLoopFuelingBlendCurveSwitch);
+	return Pull2DHooked((TwoDTable*)table, xLookup);
+}
+
+float Pull3DRamHookStartupEnrich1(float* table, float xLookup, float yLookup)
+{
+	if((table == tStartupEnrich1Cruise ||
+	table == tStartupEnrich1NonCruise)
+	&& (pRamVariables->PolfHackEnabled == HackEnabled))//This hook is used by other tables!!
+		return Pull3DHooked((ThreeDTable*)table, xLookup, yLookup) 
+		* Pull3DHooked((ThreeDTable*)&StartupEnrichMultiplier, pRamVariables->MapBlendRatio, xLookup);
+	return Pull3DHooked((ThreeDTable*)table, xLookup, yLookup);	
+}
+#endif

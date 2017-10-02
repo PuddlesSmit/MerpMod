@@ -21,3 +21,48 @@ float Abs(float input)
 	else
 		return input * -1.0f;
 }
+
+float LowPass(float input, float limit)
+{
+	if(input < limit)
+		return input;
+	else
+		return limit;
+}
+
+float HighPass(float input, float limit)
+{
+	if(input > limit)
+		return input;
+	else
+		return limit;
+}
+
+float BandPass(float input, float lowlim, float highlim)
+{
+	if(input > highlim)
+		return highlim;
+	else if(input < lowlim)
+		return lowlim;
+	else
+		return input;
+}
+
+int BandPassInt(int input, int lowlim, int highlim)
+{
+	if(input > highlim)
+		return highlim;
+	else if(input < lowlim)
+		return lowlim;
+	else
+		return input;
+}
+
+float Smooth(float smoothingFactor, float input, float previous)
+{
+	float output = previous;
+	float diff = input - previous;
+	float smooth = BandPass(smoothingFactor,0.1,1);
+	output += diff * smooth;
+	return output;
+}

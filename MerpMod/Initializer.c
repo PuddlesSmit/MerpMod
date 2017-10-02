@@ -25,6 +25,19 @@ void Initializer()
 	ResetRamVariables();
 #endif
 
+#if PROG_MODE && CRUISE_CONTROL
+	//Check every init for test mode switch (entering OEM test mode)
+	//If entering OEM test mode, disable programming mode to stop CEL flash
+	if(TestTestModeSwitch())
+	{
+		pRamVariables->ProgModeStatus = ProgModeDisabled;
+	}
+	else
+	{
+		pRamVariables->ProgModeStatus = ProgModeEnabled;
+	}
+#endif
+
 }
 
 void ResetRamVariables()
@@ -35,10 +48,9 @@ void ResetRamVariables()
 
 void InitRamVariables()
 {
-	if(pRamVariables->MasterInitFlag != 0xB4)
+	if(pRamVariables->ECUIdentifier != *(long*)dEcuId || pRamVariables->HardResetFlag == HardResetFlagEnabled)
 	{
-		ClearRamVariables((long*)pRamVariables,(long*)&pRamVariables->RamHoleEndMarker);
-		PopulateRamVariables();
+		ResetRamVariables();
 	}
 }
 
@@ -69,14 +81,23 @@ pRamVariables->CruiseCoastLast = TestCruiseCoastSwitch();
 #if SWITCH_HACKS
 	pRamVariables->MapSwitch = DefaultMapSwitch;
 	pRamVariables->MapBlendRatio = DefaultMapBlendRatio;
+	pRamVariables->MapSwitchingInputMode = DefaultMapSwitchingInputMode;
+	pRamVariables->MapBlendingInputMode = DefaultMapBlendingInputMode;
+	pRamVariables->WideBandLambdaInputMode = WideBandLambdaInputMode;
+	pRamVariables->FuelPressureInputMode = FuelPressureInputMode;
+	pRamVariables->MapBlendOutOfRangeCounter = MapBlendCount;
+	pRamVariables->LeanBoostCounter = LeanBoostDelay;
+	pRamVariables->FuelPressureDeltaCounter = FuelPressureDeltaDelay;
+	pRamVariables->WideBandLambda = 0;
+	pRamVariables->FuelPressure = 0;
+	
+	
 #endif
 
 #if PROG_MODE
-	pRamVariables->ProgModeEnable = 0;
-	pRamVariables->ProgModeWait = 0;
-	pRamVariables->ProgModeEntry = 0;
-	pRamVariables->ProgModeEnable = 0;
-	pRamVariables->ProgModeCurrentMode = 0;
+	pRamVariables->ProgModeCurrentMode = 1;
+	pRamVariables->ProgModeValueFlashes = 0;
+	pRamVariables->ValetMode = ValetModeDisabled;
 #endif
 
 #if REVLIM_HACKS
@@ -97,6 +118,10 @@ pRamVariables->CruiseCoastLast = TestCruiseCoastSwitch();
 	pRamVariables->LaunchControlHyst = DefaultLaunchControlHyst;
 	pRamVariables->FlatFootShiftSpeedThreshold = DefaultFlatFootShiftSpeedThreshold;
 	pRamVariables->FlatFootShiftRpmThreshold = DefaultFlatFootShiftRpmThreshold;
+	pRamVariables->ClutchSwitchLast = *pClutchFlags & ClutchBitMask;
+#if !AUTO_TRANS
+	RevLimReset();
+#endif	
 #endif 
 
 #if VIN_HACKS
@@ -130,11 +155,16 @@ pRamVariables->CruiseCoastLast = TestCruiseCoastSwitch();
 	pRamVariables->LCTimingRetardMultiplier = DefaultLCTimingRetardMultiplier;
 #endif
 
+#if BOOST_HACKS
+	pRamVariables->BoostHackEnabled = DefaultBoostHackEnabled;
+#endif
+
 #if SD_HACKS
 	pRamVariables->MafMode = DefaultMafMode;
 #endif
 
-pRamVariables->MasterInitFlag = 0xB4;//TODO Absract this
+pRamVariables->ECUIdentifier = *(long*)dEcuId;
+pRamVariables->HardResetFlag = HardResetFlagDisabled;
 
 }
 

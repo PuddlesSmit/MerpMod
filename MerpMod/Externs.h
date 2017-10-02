@@ -20,10 +20,20 @@
 
 #if PORT_LOGGER
 void PortLogger() ROMCODE;
+void ADCLogger() ROMCODE;
 #endif
 
+#if RAM_HOLE_SCANNER
+void RamHoleScanner() ROMCODE;
+#endif
+
+
+void MapSwitchSiDriveCheck() ROMCODE;
+unsigned char TestTestModeSwitch() ROMCODE;
+unsigned char TestDefogSwitch() ROMCODE;
 unsigned char TestBrakeSwitch()	ROMCODE;
 unsigned char TestClutchSwitch() ROMCODE;
+unsigned char TestClutchSwitchDepressedEvent() ROMCODE;
 unsigned char TestCruiseResumeSwitch() ROMCODE;
 unsigned char TestCruiseCoastSwitch() ROMCODE;
 void TestCruiseControlToggles() ROMCODE;
@@ -44,23 +54,22 @@ void CelFlashStart(unsigned char CelFlashes, unsigned char Speed, unsigned char 
 void CelFlash()	ROMCODE;
 void WGDCHack(void) ROMCODE;
 void TargetBoostHack(void) ROMCODE;
+void InjectorHack() ROMCODE;
 void POLFHack()  ROMCODE;
 float TimingHack()  ROMCODE;
 float Pull2DRamHook(float* table, float xLookup) ROMCODE;
+float Pull2DRamHookTipInEnrich(float* table, float xLookup) ROMCODE;
+float Pull2DRamHookCrankingFuel(float* table, float xLookup) ROMCODE;
+float Pull2DRamHookStartupEnrich2(float* table, float xLookup) ROMCODE;
+float Pull2DRamHookStartupEnrich3(float* table, float xLookup) ROMCODE;
+float Pull2DRamHookFrontO2Scaling(float* table, float xLookup) ROMCODE;
 float Pull3DRamHook(float* table, float xLookup, float yLookup) ROMCODE;
+float Pull3DRamHookStartupEnrich1(float* table, float xLookup, float yLookup) ROMCODE;
 void VinCheck() ROMCODE;
 
 void ProgModeListener()  ROMCODE;
 void ProgModeMain()  ROMCODE;
-void EnterProgMode()  ROMCODE;
-void ExitProgMode()  ROMCODE;
 void ProgModeCruiseToggled(unsigned char) ROMCODE;
-
-void ProgModeMapSwitch()  ROMCODE;
-void ProgModeBlendAdjust()  ROMCODE;
-void ProgModeLCAdjust()  ROMCODE;
-void ProgModeIAMAdjust() ROMCODE;
-void ProgModeValetMode() ROMCODE;
 
 void LCAdjustCruiseToggled(unsigned char) ROMCODE;
 
@@ -70,14 +79,29 @@ void SetClutch(int value) __attribute__ ((section ("Misc")));
 void SetBrake(int value) __attribute__ ((section ("Misc")));
 
 float Abs(float input) ROMCODE;
+float LowPass(float input, float limit) ROMCODE;
+float HighPass(float input, float limit) ROMCODE;
+float BandPass(float input, float lowlim, float highlim) ROMCODE;
+int BandPassInt(int input, int lowlim, int highlim) ROMCODE;
+float Smooth(float smoothingFactor, float input, float previous) ROMCODE;
 
-void RevLimCode(void) ROMCODE;
-void RevLimReset(void) ROMCODE;
+void RevLimCode() ROMCODE;
+void RevLimReset() ROMCODE;
 
+float GetBlendCurveRatio(unsigned char curve) ROMCODE;
 float BlendAndSwitch(TableGroup tg, float xLookup, float yLookup) ROMCODE;
+float BlendCurve(float xLookup, float yLookup,unsigned char curve) ROMCODE;
+float BlendAndSwitchCurve(TableGroup tg, float xLookup, float yLookup, unsigned char curve) ROMCODE;
 float SwitchSelect(TableSubSet tss, float xLookup, float yLookup) ROMCODE;
 void InputUpdate() ROMCODE;
+void MapBlendFailSafeCount() ROMCODE;
+void UpdateMapBlendRatio(float inputVoltage) ROMCODE;
 void MapSwitchThresholdCheck(float input) ROMCODE;
+void UpdateFuelPressureInput(float InputVoltage) ROMCODE;
+void FuelPressureDeltaCount() ROMCODE;
+void UpdateWideBandLambdaInput(float InputVoltage) ROMCODE;
+void LeanBoostCount() ROMCODE;
+void UpdateFailSafes() ROMCODE;
 
 //////////////////////////
 //Extern Function Pointers
@@ -107,6 +131,10 @@ extern ThreeDTable TemperatureCompensationTable;
 extern ThreeDTable AtmosphericCompensationTable;
 extern ThreeDTable SDBlendingTable;
 
+extern TwoDTable MafScalingTable1;
+extern TwoDTable MafScalingTable2;
+
+extern TwoDTable InjectorScalingMultiplierTable;
 
 extern unsigned char DefaultPolfHackEnabled;
 extern TableGroup FuelTableGroup;
@@ -117,10 +145,15 @@ extern ThreeDTable FuelTable2s;
 extern ThreeDTable FuelTable1ss;
 extern ThreeDTable FuelTable2ss;
 extern ThreeDTable LCFuelEnrichTable;
+
 extern unsigned char DefaultLCFuelMode;
 extern float DefaultLCFuelLock;
 extern float DefaultLCFuelEnrichMultiplier;
 
+extern TwoDTable FrontOxygenSensorScaling1;
+extern TwoDTable FrontOxygenSensorScaling2;
+
+extern unsigned char DefaultBoostHackEnabled;
 extern TableGroup PGWGTableGroup;
 extern ThreeDTable PGWGTable1i;
 extern ThreeDTable PGWGTable2i;
@@ -128,6 +161,7 @@ extern ThreeDTable PGTBTable1s;
 extern ThreeDTable PGTBTable2s;
 extern ThreeDTable PGWGTable1ss;
 extern ThreeDTable PGWGTable2ss;
+extern ThreeDTable PGWGTableValetMode;
 
 extern TableGroup PGTBTableGroup;
 extern ThreeDTable PGTBTable1i;
@@ -136,6 +170,7 @@ extern ThreeDTable PGWGTable1s;
 extern ThreeDTable PGWGTable2s;
 extern ThreeDTable PGTBTable1ss;
 extern ThreeDTable PGTBTable2ss;
+extern ThreeDTable PGTBTableValetMode;
 
 extern TableGroup TargetBoostTableGroup;
 extern ThreeDTable TargetBoostTable1i;
@@ -185,11 +220,32 @@ extern ThreeDTable KnockCorrectionRetardTable2ss;
 
 extern ThreeDTable LCTimingRetardTable;
 
+extern float FBKCRetardValue1;
+extern float FBKCRetardValue2;
+
+extern float FBKCRetardValueAlternate1;
+extern float FBKCRetardValueAlternate2;
+
+extern unsigned char FailSafeFuelAdditive;
+extern unsigned char FailSafeFuelAdditive;
+extern unsigned char EGTFailSafeFuelAdditiveEnable;
+extern unsigned char CoolantTempFailSafeFuelAdditiveEnable;
+extern unsigned char FBKCHiFailSafeFuelAdditiveEnable;
+extern unsigned char LeanBoostFailSafeFuelAdditiveEnable;
+
+extern unsigned char EGTFailSafeValetModeEnable;
+extern unsigned char CoolantTempFailSafeValetModeEnable;
+extern unsigned char FBKCHiFailSafeValetModeEnable;
+extern unsigned char LeanBoostFailSafeValetModeEnable;
+extern unsigned char FuelPressureDeltaFailSafeValetModeEnable;
+extern unsigned char InjectorDutyCycleFailSafeValetModeEnable;
+
+extern unsigned char UseInjectorLatency;
 
 extern float RPMLockWGDC;
 extern float ThrottleLockWGDC;
 
-extern float GearRatios[];
+extern float GearRatios[6];
 
 extern float FFSMinimumThrottle;
 extern float LCMinimumThrottle;
@@ -232,6 +288,16 @@ extern unsigned char EGTFlashes;
 extern unsigned char EGTFlashSpeed;
 extern unsigned char IAMFlashSpeed;
 extern unsigned char IAMFlashes;
+extern unsigned char MapBlendFlashSpeed;
+extern unsigned char MapBlendFlashes;
+extern unsigned char LeanBoostFlashSpeed;
+extern unsigned char LeanBoostFlashes;
+extern unsigned char FuelPressureDeltaFlashSpeed;
+extern unsigned char FuelPressureDeltaFlashes;
+extern float FuelPressureTriggerMinRPM;
+extern unsigned char InjectorDutyCycleFlashSpeed;
+extern unsigned char InjectorDutyCycleFlashes;
+
 extern float IAMFlashThreshold;
 extern unsigned char ECTFlashes;
 extern unsigned char ECTFlashSpeed;
@@ -268,12 +334,75 @@ extern unsigned char Licensee[];
 #if SWITCH_HACKS
 extern unsigned char DefaultMapSwitch;
 extern float DefaultMapBlendRatio;
-extern TwoDTable TGVLeftScaling;
-extern TwoDTable TGVRightScaling;
+
+/*
+extern float LeftTGVInputSmoothingFactor;
+extern float RightTGVInputSmoothingFactor;
+
+extern float LeftTGVInputMultiplier;
+extern float RightTGVInputMultiplier;
+extern float RearO2InputMultiplier;
+
+extern float LeftTGVInputOffset;
+extern float RightTGVInputOffset;
+extern float RearO2InputOffset;
+
+extern float LeftTGVInputThreshold;
+extern float RightTGVInputThreshold;
+*/
+extern float BlendInputMinimumVolts;
+extern float BlendInputMaximumVolts;
+extern unsigned char MapBlendFailSafe;
+extern unsigned short MapBlendCount;
+extern float MapBlendSmoothingFactor;
+extern float MapSwitchSmoothingFactor;
+extern float MapBlendBoostContentLock;
+extern float BaseFuelPressure;
+
+unsigned char OpenLoopFuelingBlendCurveSwitch;
+unsigned char ClosedLoopFuelingBlendCurveSwitch;
+unsigned char TimingBlendCurveSwitch;
+unsigned char KnockControlBlendCurveSwitch;
+unsigned char WastegateDutyBlendCurveSwitch;
+unsigned char BoostBlendCurveSwitch;
+unsigned char MassAirFlowScalingBlendCurveSwitch;
+unsigned char SpeedDensityBlendCurveSwitch;
+
+extern TwoDTable MapBlendScaling;
 extern float MapSwitchThresholdLo;
 extern float MapSwitchThresholdHi;
-extern unsigned char BlendRatioInput;
-extern unsigned char MapSwitchInput;
+
+extern unsigned char DefaultMapBlendingInputMode;
+extern unsigned char DefaultMapSwitchingInputMode;
+
+extern TwoDTable MapBlendCurve1;
+extern TwoDTable MapBlendCurve2;
+extern TwoDTable MapBlendCurve3;
+extern TwoDTable MapBlendCurve4;
+
+extern ThreeDTable TipInEnrichMultiplier;
+extern ThreeDTable CrankingFuelMultiplier;
+extern ThreeDTable StartupEnrichMultiplier;
+
+extern unsigned char WideBandLambdaInputMode;
+extern unsigned char FuelPressureInputMode;
+extern float WidebandSensorSmoothingFactor;
+extern float FuelPressureSensorSmoothingFactor;
+
+extern unsigned short LeanBoostDelay;
+extern float LeanBoostAFRThreshold;
+extern float LeanBoostMRPThreshold;
+extern float InjectorDutyCycleThreshold;
+
+extern unsigned short FuelPressureDeltaDelay;
+extern float FuelPressureDeltaThreshold;
+
+
+extern TwoDTable WideBandScaling;
+extern TwoDTable FuelPressureScaling;
+
+
+
 #endif
 
 extern long RomHoleEndMarker;
