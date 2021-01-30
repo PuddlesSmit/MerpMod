@@ -200,4 +200,3 @@
 #define hMemoryReset (0x0000DA70)
 #define pMemoryResetLimit (0xFFFFBFBB)
 #define hMemoryResetLimit (0x00011EE0)
-

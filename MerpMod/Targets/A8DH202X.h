@@ -1,6 +1,5 @@
-#define MOD_IDENTIFIER STRI(A8DH202X.MeRpMoD.Switch.Testing.v00.60.d14.12.9.2112)
-#define MOD_ECUID 5AED006023
-#define MOD_DATE 14.12.9.2112
+#define MOD_ECUID DBF6BF033B
+#define MOD_DATE 28.01.21.21.39
 #include "Switch.h"
 #define MOD_CONFIG Switch
 #define MOD_BUILD Testing
@@ -24,22 +23,33 @@
 
 #define pTGVLeftVoltage ((unsigned short*)0xFFFF5C0A)
 #define pTGVRightVoltage ((unsigned short*)0xFFFF5C0C)
+#define pRearO2Voltage ((float*)0xFFFF5CBC)
 #define sShortToFloat (0x00002594)
+#define hPull2DTipInEnrich (0x33240)
 #define tTipInEnrich (0x0009508C)
+#define tTipInEnrich2 (0x0009508C)
+#define hPull2DCrankingFuel (0x2B0B8)
 #define tCrankingFuelA (0x00094CD0)
 #define tCrankingFuelB (0x00094CE4)
 #define tCrankingFuelC (0x00094CF8)
 #define tCrankingFuelD (0x00094D0C)
 #define tCrankingFuelE (0x00094D20)
 #define tCrankingFuelF (0x00094D34)
+#define hPull3DStartupEnrich1 (0x2BC64)
+#define tStartupEnrich1Cruise (0x953CC)
+#define tStartupEnrich1NonCruise (0x953B0)
+#define hPull2DStartupEnrich2 (0x2BB38)
 #define tStartupEnrich2_1A (0x00094D98)
 #define tStartupEnrich2_1B (0x00094DC0)
 #define tStartupEnrich2_2A (0x00094DAC)
 #define tStartupEnrich2_2B (0x00094DD4)
+#define hPull2DStartupEnrich3 (0x2B95C)
 #define tStartupEnrich3_1A (0x00094D48)
 #define tStartupEnrich3_1B (0x00094D5C)
 #define tStartupEnrich3_2A (0x00094D70)
 #define tStartupEnrich3_2B (0x00094D84)
+#define hPull2DFrontO2Scaling (0xBFD8)
+#define tFrontO2Scaling (0x96600)
 
 /////////////////////
 // Rev Limit Hack
@@ -124,6 +134,10 @@
 #define hPull3DTiming (0x00037DDC)
 #define hSubKca (0x00037654)
 #define pKcaIam (0xFFFF7840)
+#define hFBKCRetardValue (0x3A5A4)
+#define dFBKCRetardValue ((float*)0xCB890)
+#define hFBKCRetardValueAlternate (0x3A584)
+#define dFBKCRetardValueAlternate ((float*)0x0CB894)
 
 /////////////////////
 // Spark Cut
@@ -165,6 +179,9 @@
 #define pCoolantTemp ((float*)0xFFFF67C4)
 #define pAtmoPress ((float*)0xFFFF5CD4)
 #define pManifoldAbsolutePressure ((float*)0xFFFF6698)
+#define pManifoldRelativePressure ((float*)0xFFFF669C)
+#define pInjectorPulseWidth ((float*)0xFFFF7568)
+#define pInjectorLatency ((float*)0xFFFF757C)
 #define pIntakeAirTemp ((float*)0xFFFF5C9C)
 #define pMassAirFlow ((float*)0xFFFF5CD0)
 #define pMafSensorVoltage ((short*)0xFFFF5BFE)
