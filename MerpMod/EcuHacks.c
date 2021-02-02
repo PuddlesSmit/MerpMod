@@ -75,7 +75,6 @@ void EcuHacksMain() //Constant Hz main routine, hooked into wgdc lookup
 	CelFlash();
 #endif
 
-	ADCLogger();
 #if ALS_HACKS
 #if !ALS_RAMTUNING
 	DriveModeHack();

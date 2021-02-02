@@ -23,6 +23,7 @@ float OutputValue;
 OutputValue = Pull2DHooked(&InjectorScalingTable,pRamVariables->MapBlendRatio);
 
 pRamVariables->InjectorScaling = OutputValue;
+
 }
 
 #endif
@@ -55,7 +56,7 @@ EcuHacksMain();
 		}
 	#endif
 		pRamVariables->LCFuelEnrich = Pull3DHooked(&LCFuelEnrichTable, *pVehicleSpeed, *pEngineSpeed) * pRamVariables->LCFuelEnrichMultiplier;
-
+	
 		if(pRamVariables->LCFuelMode == LCFuelModeCompensated)
 		{
 			OutputValue += pRamVariables->LCFuelEnrich;

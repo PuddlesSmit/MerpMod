@@ -32,7 +32,6 @@ typedef struct
 
 #if INJECTOR_HACKS
 float InjectorScaling;
-	float InjectorScalingMultiplier;
 #endif
 	
 #if SPARK_CUT
@@ -274,10 +273,11 @@ float	MaxSubtractiveKCA;
 	float StartTimer1;
 	float StartTimer2;
 	float StartTimer3;
+	float StartTimer4;
 	unsigned char TimerUp1;
 	unsigned char TimerUp2;
 	unsigned char TimerUp3;
-	unsigned char Timerempty;
+	unsigned char TimerUp4;
 //	unsigned char IdleMapSelect;
 	float TargetCLAFR;
 	float OpenLoopAFRmin;

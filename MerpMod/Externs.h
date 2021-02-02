@@ -18,7 +18,6 @@
 //Function Prototypes
 //////////////////////////
 
-void ADCLogger() ROMCODE;
 unsigned char TestBrakeSwitch()	ROMCODE;
 //unsigned char BitTest(float* input, unsigned char bit) ROMCODE;
 unsigned char TestClutchSwitch() ROMCODE;
@@ -77,13 +76,10 @@ void Timers(float Minutes, float Seconds, unsigned char Number) ROMCODE;
 void Timer1(float Minutes, float Seconds) ROMCODE;
 void Timer2(float Minutes, float Seconds) ROMCODE;
 void Timer3(float Minutes, float Seconds) ROMCODE;
+void Timer4(float Minutes, float Seconds) ROMCODE;
 float TimingHack()  ROMCODE;
 void RotationalSparkCut() ROMCODE;
 float Pull2DRamHook(float* table, float xLookup) ROMCODE;
-float Pull2DRamHookTipIn(float* table, float xLookup) ROMCODE;
-float Pull2DRamHookCrankingFuel(float* table, float xLookup) ROMCODE;
-float Pull2DRamHookStartupEnrich2(float* table, float xLookup) ROMCODE;
-float Pull2DRamHookStartupEnrich3(float* table, float xLookup) ROMCODE;
 float Pull3DRamHook(float* table, float xLookup, float yLookup) ROMCODE;
 void VinCheck() ROMCODE;
 
@@ -151,7 +147,7 @@ extern ThreeDTable TemperatureCompensationTable;
 extern ThreeDTable AtmosphericCompensationTable;
 extern ThreeDTable SDBlendingTable;
 
-extern TwoDTable InjectorScalingMultiplierTable;
+extern TwoDTable InjectorScalingTable;
 
 extern unsigned char DefaultPolfHackEnabled;
 extern TableGroup FuelTableGroup;
@@ -406,22 +402,12 @@ extern unsigned char Licensee[];
 #if SWITCH_HACKS
 extern unsigned char DefaultMapSwitch;
 extern float DefaultMapBlendRatio;
-extern float LeftTGVInputSmoothingFactor;
-extern float RightTGVInputSmoothingFactor;
-extern float LeftTGVInputMultiplier;
-extern float RightTGVInputMultiplier;
-extern float LeftTGVInputOffset;
-extern float RightTGVInputOffset;
 extern TwoDTable TGVLeftScaling;
 extern TwoDTable TGVRightScaling;
 extern float MapSwitchThresholdLo;
 extern float MapSwitchThresholdHi;
 extern unsigned char BlendRatioInput;
 extern unsigned char MapSwitchInput;
-
-extern TwoDTable TipInEnrichMultiplier;
-extern TwoDTable CrankingFuelMultiplier;
-extern TwoDTable StartupEnrichMultiplier;
 #endif
 
 extern long RomHoleEndMarker;

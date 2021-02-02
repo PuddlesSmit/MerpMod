@@ -152,7 +152,12 @@ void CelFlash()
 #endif
 
 #if ALS_HACKS
-	else if(pRamVariables->ALSModeWait == 1)// || TestCruiseCancelSwitch())
+	else if(pRamVariables->TimerUp4 == 1)
+	{
+		pRamVariables->ALSModeWait == 0x01;
+		pRamVariables->TimerUp4 = 0x00;
+	}
+	else if(pRamVariables->ALSModeWait == 1)
 	{
 		CelFlashStart(ALSModeFlashes,ALSModeFlashSpeed,0,0);
 	}

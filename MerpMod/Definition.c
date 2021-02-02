@@ -106,56 +106,8 @@ typedef struct {
 
 #define DEFINERAM(NAME,ADDR,LENGTH,EID)	const ParamDef ADDR##_ParamDef DEFDATA =	{op: OpRAM , address: (int)ADDR , id: EID , buf: OpEnd , length: 0x##LENGTH , name: NAME }
 #define DEFINERAMVAR(NAME,ADDR,LENGTH,EID)	const ParamDef ADDR##_ParamDef DEFDATA =	{op: OpRAM , address: (int)&pRamVariables->ADDR , id: EID , buf: OpEnd , length: 0x##LENGTH , name: NAME }//TRY TO FIX THIS??
-#define DEFINERAMVARARRAY(NAME,ADDR,INDEX,TYPE,EID)	const ParamDef ADDR##INDEX##_ParamDef DEFDATA =	{op: OpRAM , address: (int)&pRamVariables->ADDR[INDEX] , id: EID , buf: OpEnd , storagetype: TYPE , buf2: OpEnd, name: NAME }//TRY TO FIX THIS??
-#define DEFINERAMVARARRAYALLBITS(NAME,ADDR,INDEX,TYPE,EID)	const ParamDef ADDR##INDEX##_ParamBitsDef DEFDATA =	{op: OpRAMAllBits , address: (int)&pRamVariables->ADDR[INDEX] , id: EID , buf: OpEnd , storagetype: TYPE , buf2: OpEnd, name: NAME }//TRY TO FIX THIS??
 //TODO: in sharptune, if no match is found, create a new one to read out RAWDATA!
 
-DEFINERAMVARARRAY("MerpMod Port Logger A",PortParameters,0,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger B",PortParameters,1,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger C",PortParameters,2,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger D",PortParameters,3,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger E",PortParameters,4,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger F",PortParameters,5,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger G",PortParameters,6,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger H",PortParameters,7,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger J",PortParameters,8,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger K",PortParameters,9,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger L",PortParameters,10,"uint16","E");
-
-
-//ADC
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 0",ADCParameters,0,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 1",ADCParameters,1,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 2",ADCParameters,2,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 3",ADCParameters,3,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 4",ADCParameters,4,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 5",ADCParameters,5,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 6",ADCParameters,6,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 7",ADCParameters,7,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 8",ADCParameters,8,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 9",ADCParameters,9,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 10",ADCParameters,10,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 11",ADCParameters,11,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 12",ADCParameters,12,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 13",ADCParameters,13,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 14",ADCParameters,14,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 15",ADCParameters,15,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 16",ADCParameters,16,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 17",ADCParameters,17,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 18",ADCParameters,18,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 19",ADCParameters,19,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 20",ADCParameters,20,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 21",ADCParameters,21,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 22",ADCParameters,22,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 23",ADCParameters,23,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 24",ADCParameters,24,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 25",ADCParameters,25,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 26",ADCParameters,26,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 27",ADCParameters,27,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 28",ADCParameters,28,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 29",ADCParameters,29,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 30",ADCParameters,30,"uint16","E");
-DEFINERAMVARARRAY("MerpMod Port Logger ADC 31",ADCParameters,31,"uint16","E");
 
 #if PROG_MODE
 DEFINERAMVAR("MM Prog Mode Entry",ProgModeEntry,1,"E");
@@ -277,15 +229,6 @@ DEFNEW1D("Launch Control Adjustment Step",LCAdjustStep);
 DEFINERAMVAR("MM TGV Volts Left",TGVLeftVolts,4,"E");
 DEFINERAMVAR("MM TGV Volts Right",TGVRightVolts,4,"E");
 
-DEFNEW1D("TGV Left Input Smoothing Factor",LeftTGVInputSmoothingFactor);
-DEFNEW1D("TGV Right Input Smoothing Factor",RightTGVInputSmoothingFactor);
-
-DEFNEW1D("TGV Left Input Multiplier",LeftTGVInputMultiplier);
-DEFNEW1D("TGV Right Input Multiplier",RightTGVInputMultiplier);
-
-DEFNEW1D("TGV Left Input Offset",LeftTGVInputOffset);
-DEFNEW1D("TGV Right Input Offset",RightTGVInputOffset);
-
 DEFNEW1D("Map Switch Input Threshold Low",MapSwitchThresholdLo);
 DEFNEW1D("Map Switch Input Threshold High",MapSwitchThresholdHi);
 DEFNEW1D("Map Switch Input Mode",MapSwitchInput);
@@ -296,11 +239,11 @@ DEFINERAMVAR("MM TGV Right Scaled",TGVRightScaled,4,"E");
 
 DEFNEW1D("Default Map Blending Ratio",DefaultMapBlendRatio);
 DEFNEW1D("Default Map Switch",DefaultMapSwitch);
-DEFNEW2D("Map Blending Injector Scaling Multiplier",InjectorScalingMultiplierTable);
-DEFNEW2D("Map Blending Throttle Tip-In Enrichment Multiplier",TipInEnrichMultiplier);
-DEFNEW2D("Map Blending Cranking Fuel Multiplier",CrankingFuelMultiplier);
-DEFNEW2D("Map Blending Startup Enrichment Multiplier",StartupEnrichMultiplier);
 
+#if INJECTOR_HACKS
+DEFNEW2D("Map Blending Injector Scaling",InjectorScalingTable);
+//DEFINERAMVAR("MerpMod Injector Scaling",InjectorScaling,"4","E");
+#endif
 
 #endif
 
@@ -325,8 +268,7 @@ DEFNEW3D("Primary Open Loop Fueling Table 2",FuelTable2i);
 #endif
 DEFNEW3D("Launch Control Fuel Enrichment",LCFuelEnrichTable);	
 DEFNEW1D("Launch Control Fueling Mode",DefaultLCFuelMode);	
-DEFNEW1D("Launch Control Enrichment (Lock Mode)",DefaultLCFuelLock);
-DEFNEW1D("Default Launch Control Fueling Compensation Multiplier",DefaultLCFuelEnrichMultiplier);	
+DEFNEW1D("Launch Control Enrichment (Lock Mode)",DefaultLCFuelLock);	
 
 #endif
 

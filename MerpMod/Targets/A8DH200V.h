@@ -1,3 +1,4 @@
+#define MOD_IDENTIFIER STRI(A8DH200V.MeRpMoD.Switch.Testing.v00.60.d14.12.9.2112) 
 #define MOD_DATE 2.2.20.001
 
 #include "Switch.h"

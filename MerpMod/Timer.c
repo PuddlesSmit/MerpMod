@@ -104,4 +104,24 @@ void Timer3(float Minutes, float Seconds)
             pRamVariables->TimerUp3 = 0x00;
         }
 }
+//Recall DriveMode Timer
+void Timer4(float Minutes, float Seconds)
+{
+    if (pRamVariables->StartTimer4 < 1)
+        {
+            pRamVariables->StartTimer4 = (((Minutes * 60) + Seconds) * CyclesPerSec);
+        }
+    else
+        {
+            pRamVariables->StartTimer4 -= 1;
+        }
+	if (pRamVariables->StartTimer4 < 1)
+        {
+            pRamVariables->TimerUp4 = 0x01;
+        }
+    else
+        {
+            pRamVariables->TimerUp4 = 0x00;
+        }
+}
 #endif

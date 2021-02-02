@@ -1,6 +1,5 @@
-#define MOD_IDENTIFIER STRI(A8DH202X.MeRpMoD.Switch.Testing.v00.60.d14.12.9.2112)
-#define MOD_ECUID 5AED006023
-#define MOD_DATE 14.12.9.2112
+#define MOD_DATE 15.4.8.911
+
 #include "Switch.h"
 #define MOD_CONFIG Switch
 #define MOD_BUILD Testing
@@ -25,21 +24,6 @@
 #define pTGVLeftVoltage ((unsigned short*)0xFFFF5C0A)
 #define pTGVRightVoltage ((unsigned short*)0xFFFF5C0C)
 #define sShortToFloat (0x00002594)
-#define tTipInEnrich (0x0009508C)
-#define tCrankingFuelA (0x00094CD0)
-#define tCrankingFuelB (0x00094CE4)
-#define tCrankingFuelC (0x00094CF8)
-#define tCrankingFuelD (0x00094D0C)
-#define tCrankingFuelE (0x00094D20)
-#define tCrankingFuelF (0x00094D34)
-#define tStartupEnrich2_1A (0x00094D98)
-#define tStartupEnrich2_1B (0x00094DC0)
-#define tStartupEnrich2_2A (0x00094DAC)
-#define tStartupEnrich2_2B (0x00094DD4)
-#define tStartupEnrich3_1A (0x00094D48)
-#define tStartupEnrich3_1B (0x00094D5C)
-#define tStartupEnrich3_2A (0x00094D70)
-#define tStartupEnrich3_2B (0x00094D84)
 
 /////////////////////
 // Rev Limit Hack
@@ -155,14 +139,14 @@
 #define pCoastFlags ((unsigned char*)0xFFFF64B0)
 #define CoastBitMask ((unsigned char)0x02)
 #define pBrakeFlags ((unsigned char*)0xFFFF64B0)
-#define BrakeBitMask ((unsigned char)0x80)
+#define BrakeBitMask ((unsigned char)0x08)
 #define pClutchFlags ((unsigned char*)0xFFFF69F1)
 #define ClutchBitMask ((unsigned char)0x80)
-#define pTestModeFlags ((unsigned char*)0xFFFF69EC)
-#define TestModeBitMask ((unsigned char)0x20)
-#define pDefogFlags ((unsigned char*)0xFFFF69EF)
-#define DefogBitMask ((unsigned char)0x20)
-#define pSSMResetByte ((unsigned char*)0xFFFF2D8E)
+#define pIdleFlags ((unsigned char*)0xFFFF6946)
+#define IdleBitMask ((unsigned char)0x80)
+#define pNeutralFlags ((unsigned char*)0xFFFF69EF)
+#define NeutralBitMask ((unsigned char)0x02)
+#define pDefoggerFlags ((unsigned char*)0xFFFF69EF)
 #define DefoggerBitMask ((unsigned char)0x20)
 #define pClosedLoopFlags ((unsigned char*)0xFFFF9299)
 //8 = Closed Loop (normal)]  [10 = Open Loop (normal)]  [7 = Open Loop due insufficient coolant temp]  [14 = Open Loop due to system failure].

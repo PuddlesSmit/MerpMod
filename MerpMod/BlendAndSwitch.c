@@ -84,8 +84,8 @@ void InputUpdate()
 	float offs = 0.0f;
 	pRamVariables->TGVLeftVolts = ShortToFloatHooked(*pTGVLeftVoltage,grad,offs);
 	pRamVariables->TGVRightVolts = ShortToFloatHooked(*pTGVRightVoltage,grad,offs);
-	pRamVariables->TGVLeftScaled = Smooth(LeftTGVInputSmoothingFactor,Pull2DHooked(&TGVLeftScaling,pRamVariables->TGVLeftVolts), pRamVariables->TGVLeftScaled) * LeftTGVInputMultiplier + LeftTGVInputOffset;
-	pRamVariables->TGVRightScaled = Smooth(RightTGVInputSmoothingFactor,Pull2DHooked(&TGVRightScaling,pRamVariables->TGVRightVolts), pRamVariables->TGVRightScaled) * RightTGVInputMultiplier + LeftTGVInputOffset;
+	pRamVariables->TGVLeftScaled = Pull2DHooked(&TGVLeftScaling,pRamVariables->TGVLeftVolts);
+	pRamVariables->TGVRightScaled = Pull2DHooked(&TGVRightScaling,pRamVariables->TGVRightVolts);
 	
 	switch(BlendRatioInput)
 	{

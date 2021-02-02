@@ -73,7 +73,7 @@ OpModAuth=		0x1234000E,
 OpModId=		0x1234000F
 };
 
-#define OpDelim STR(\0\0\0\0\0\0)
+#define OpDelim "\0\0\0\0\0\0"
 
 typedef struct
 {
@@ -140,11 +140,7 @@ ecuidbytes: ECU_IDENTIFIER_CHARS,
 ecuid:		STR(ECU_IDENTIFIER),
 pad3:   OpDelim,
 newecuidop:	OpNewECUID,
-#ifdef MOD_ECUID
-newecuid:	STR(MOD_ECUID),
-#else
 newecuid:	STR(MOD_ECU_IDENTIFIER),
-#endif
 pad4:   OpDelim,
 
 //Mod Information
@@ -282,21 +278,24 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)Pull3DRamHook,
 		name: STR(WGDC Pull3D Hook)
 	} ;
+/*
 	#ifdef hTableWgdcInitialKcaAlt
 		const MetaReplace PGWGInitialKcaAlt METADATA =
 		{
 			op: OpReplace4Bytes,
 			address: hTableWgdcInitialKcaAlt,
 			oldval: tWgdcInitialKcaAlt,
-			newval: (int)&(pRamVariables->WGDCMax),
+			newval: (int)&(pRamVariables->WGDCIntial),
 			name: STR(WGDC Initial KCA Alt Table Hook)
 		};
+*/
+	#ifdef hTableWgdcInitialKcaBLo
 		const MetaReplace PGWGInitialKcaBLo METADATA =
 		{
 			op: OpReplace4Bytes,
 			address: hTableWgdcInitialKcaBLo,
 			oldval: tWgdcInitialKcaBLo,
-			newval: (int)&(pRamVariables->WGDCMax),
+			newval: (int)&(pRamVariables->WGDCInitial),
 			name: STR(WGDC Initial KCA B Low Table Hook)
 		};		
 		const MetaReplace PGWGInitialKcaBHi METADATA =
@@ -304,7 +303,7 @@ const MetaReplace WGDCHook METADATA =
 			op: OpReplace4Bytes,
 			address: hTableWgdcInitialKcaBHi,
 			oldval: tWgdcInitialKcaBHi,
-			newval: (int)&(pRamVariables->WGDCMax),
+			newval: (int)&(pRamVariables->WGDCInitial),
 			name: STR(WGDC Initial KCA B High Table Hook)
 		};
 	#else
@@ -461,7 +460,26 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->BaseTimingOutput),
 		name: STR(Timing Table Hook)
 	};
-#else
+#endif
+#ifdef hTableBaseTimingKCAHi
+	const MetaReplace TimingTableKCAHiPatch METADATA =
+	{
+		op: OpReplace4Bytes,
+		address: hTableBaseTimingKCAHi,
+		oldval: tBaseTimingKCAHi,
+		newval: (int)&(pRamVariables->BaseTimingOutput),
+		name: STR(Timing Table KCA Hi Hook)
+	};
+	const MetaReplace TimingTableKCALowPatch METADATA =
+	{
+		op: OpReplace4Bytes,
+		address: hTableBaseTimingKCALo,
+		oldval: tBaseTimingKCALo,
+		newval: (int)&(pRamVariables->BaseTimingOutput),
+		name: STR(Timing Table KCA Low Hook)
+	};
+#endif
+#ifdef hTableBaseTimingPCruise
 	const MetaReplace BaseTimingPCruiseTablePatch METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -470,6 +488,8 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->BaseTimingOutput),
 		name: STR(Base Timing Primary Cruise Table Hook)
 	};
+#endif
+#ifdef hTableBaseTimingPNonCruise
 	const MetaReplace BaseTimingPNonCruiseTablePatch METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -478,24 +498,28 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->BaseTimingOutput),
 		name: STR(Base Timing Primary Non Cruise Table Hook)
 	};
+#endif	
+#ifdef hTableBaseTimingRCruiseAvcs
 	const MetaReplace BaseTimingRCruiseAvcsTablePatch METADATA =
 	{
 		op: OpReplace4Bytes,
-		address:hTableBaseTimingRCruiseAvcs,
+		address: hTableBaseTimingRCruiseAvcs,
 		oldval: tBaseTimingRCruiseAvcs,
 		newval: (int)&(pRamVariables->BaseTimingOutput),
 		name: STR(Base Timing Reference Cruise AVCS Table Hook)
 	};
+#endif
+#ifdef hTableBaseTimingRNonCruiseAvcs
 	const MetaReplace BaseTimingRNonCruiseAvcsTablePatch METADATA =
 	{
 		op: OpReplace4Bytes,
-		address:hTableBaseTimingRNonCruiseAvcs,
+		address: hTableBaseTimingRNonCruiseAvcs,
 		oldval: tBaseTimingRNonCruiseAvcs,
 		newval: (int)&(pRamVariables->BaseTimingOutput),
 		name: STR(Base Timing Reference Non Cruise AVCS Table Hook)
 	};
 #endif
-
+#ifdef hPull3DTiming
 	const MetaReplace TimingPullPatch METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -504,6 +528,7 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)Pull3DRamHook,
 		name: STR(Timing Pull3D Hook)
 	};
+#endif
 #endif
 
 #if POLF_HACKS 
@@ -571,10 +596,10 @@ const MetaReplace WGDCHook METADATA =
 
 #endif
 
-#if E85_HACKS
+#if INJECTOR_HACKS
 //////////////////////
 //					//
-//     E85 HACKS	//
+//INJECTOR HACKS	//
 //					//
 //////////////////////
 
@@ -586,39 +611,7 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->InjectorScaling),
 		name: STR(Injector Scalar Hook)
 	};
-	const MetaReplace TipInEnrichHookPull METADATA = 
-	{
-		op: OpReplace4Bytes,
-		address: hPull2DTipInEnrich,
-		oldval: sPull2DFloat,
-		newval: (int)Pull2DRamHookTipInEnrich,
-		name: STR(Tip In Enrichment Pull2D Hook)
-	};
-	const MetaReplace CrankingFuelHookPull METADATA = 
-	{
-		op: OpReplace4Bytes,
-		address: hPull2DCrankingFuel,
-		oldval: sPull2DFloat,
-		newval: (int)Pull2DRamHookCrankingFuel,
-		name: STR(Cranking Fuel Pull2D Hook)
-	};
-	const MetaReplace StartupEnrich2HookPull METADATA = 
-	{
-		op: OpReplace4Bytes,
-		address: hPull2DStartupEnrich2,
-		oldval: sPull2DFloat,
-		newval: (int)Pull2DRamHookStartupEnrich2,
-		name: STR(Startup Enrich 2 Pull2D Hook)
-	};
-	const MetaReplace StartupEnrich3HookPull METADATA = 
-	{
-		op: OpReplace4Bytes,
-		address: hPull2DStartupEnrich3,
-		oldval: sPull2DFloat,
-		newval: (int)Pull2DRamHookStartupEnrich3,
-		name: STR(Startup Enrich 3 Pull2D Hook)
-	};
-
+	
 #endif
 
 #if ALS_HACKS
@@ -761,6 +754,7 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->RequestedTorque),
 		name: STR(Requested Torque Table A Hook)
 	};
+#ifdef hPullBaseTimingIdle
 	const MetaReplace BaseTimingIdleHookPull METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -769,6 +763,8 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)Pull2DRamHook,
 		name: STR(Base Timing Idle Table Hook)
 	} ;
+#endif
+#ifdef hTableBaseTimingIdleInGearA
 	const MetaReplace BaseTimingIdleInGearAHookTable METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -777,6 +773,8 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->BaseTimingIdle),
 		name: STR(Base Timing Idle In Gear A Hook)
 	};
+#endif
+#ifdef hTableBaseTimingIdleInGearB
 	const MetaReplace BaseTimingIdleInGearBHookTable METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -785,6 +783,8 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->BaseTimingIdle),
 		name: STR(Base Timing Idle In Gear B Hook)
 	};
+#endif
+#ifdef hTableBaseTimingIdleNeutralA
 	const MetaReplace BaseTimingIdleNeutralAHookTable METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -793,6 +793,8 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->BaseTimingIdle),
 		name: STR(Base Timing Idle Neutral A Hook)
 	};
+#endif
+#ifdef hTableBaseTimingIdleNeutralB
 	const MetaReplace BaseTimingIdleNeutralBHookTable METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -801,6 +803,27 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->BaseTimingIdle),
 		name: STR(Base Timing Idle Neutral B Hook)
 	};
+#endif
+#ifdef hTableBaseTimingIdleUnderSpeed
+	const MetaReplace BaseTimingIdleUnderSpeedHookTable METADATA =
+	{
+		op: OpReplace4Bytes,
+		address: hTableBaseTimingIdleUnderSpeed,
+		oldval: dBaseTimingIdleUnderSpeed,
+		newval: (int)&(pRamVariables->BaseTimingIdle),
+		name: STR(Base Timing Idle UnderSpeed Hook)
+	};
+#endif
+#ifdef hTableBaseTimingIdleOverSpeed
+	const MetaReplace BaseTimingIdleOverSpeedHookTable METADATA =
+	{
+		op: OpReplace4Bytes,
+		address: hTableBaseTimingIdleOverSpeed,
+		oldval: tBaseTimingIdleOverSpeed,
+		newval: (int)&(pRamVariables->BaseTimingIdle),
+		name: STR(Base Timing Idle OverSpeed Hook)
+	};
+#endif
 /*
 	const MetaReplace PedalHook METADATA =
 	{
@@ -810,7 +833,9 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)PedalHack,
 		name: STR(Pedal Hook)
 	};
-*/	const MetaReplace WGDCHiJackHook METADATA =
+*/
+#if WRX
+	const MetaReplace WGDCHiJackHook METADATA =
 	{
 		op: OpReplace4Bytes,
 		address: hDutyCycleOut,
@@ -818,6 +843,17 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)WGDCalt,
 		name: STR(WGDC Final Subroutine Hook)
 	};
+#endif
+#ifdef hTargetIdleTPSstiA
+	const MetaReplace TargetIdleTPSstiA METADATA =
+	{
+		op: OpReplace4Bytes,
+		address: hTargetIdleTPSstiA,
+		oldval: pTargetTPSIdle,
+		newval: (int)&(pRamVariables->ALSTPS),
+		name: STR(Target Idle TPS sti A Hook)
+	};
+#else
 	const MetaReplace TargetIdleTPSHook METADATA =
 	{
 		op: OpReplace4Bytes,
@@ -826,6 +862,17 @@ const MetaReplace WGDCHook METADATA =
 		newval: (int)&(pRamVariables->ALSTPS),
 		name: STR(Target Idle TPS Hook)
 	};
+#endif
+#ifdef hTargetIdleTPSstiB
+	const MetaReplace TargetIdleTPSstiB METADATA =
+	{
+		op: OpReplace4Bytes,
+		address: hTargetIdleTPSstiB,
+		oldval: pTargetTPSIdle,
+		newval: (int)&(pRamVariables->ALSTPS),
+		name: STR(Target Idle TPS sti B Hook)
+	};
+#endif
 /*	const MetaReplace SparkHook METADATA =
 	{
 		op: OpReplace4Bytes,

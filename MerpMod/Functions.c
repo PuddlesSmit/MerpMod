@@ -78,9 +78,9 @@ unsigned short BandPassShort(unsigned short input, unsigned short lowlim, unsign
 
 float Smooth(float smoothingFactor, float input, float previous)
 {
-	float output = previous;
-	float diff = input - previous;
-	float smooth = BandPass(smoothingFactor,0.1,1);
-	output += diff * smooth;
-	return output;
+float output = previous;
+float diff = input - previous;
+float smooth = BandPass(smoothingFactor,0.1,1);
+output += diff * smooth;
+return output;
 }
